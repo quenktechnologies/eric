@@ -1,0 +1,29 @@
+{
+  "name": "@quenk/eric",
+  "version": "0.0.3",
+  "description": "CLI tool for generating project boilerplate.",
+  "author": "Quenk Technologies Limited <info@quenk.com> (http://quenk.com)",
+  "bin": {
+    "eric": "lib/main.js"
+  },
+  "files": ["lib"],
+  "scripts": {
+    "test-parser": "./node_modules/.bin/mocha --opts mocha.opts test/parser/parse.js"
+  },
+  "dependencies": {
+    "@quenk/noni": "^1.8.2",
+    "@quenk/polate": "^1.3.0",
+    "nodegit": "^0.23.0",
+    "property-seek": "^3.1.1"
+  },
+  "devDependencies": {
+    "@types/mocha": "^5.2.5",
+    "@types/node": "^10.12.12",
+    "@types/nodegit": "^0.22.5",
+    "docopt": "^0.6.2",
+    "mocha": "^5.2.0",
+    "ts-node": "^7.0.1",
+    "typescript": "^3.2.1"
+  },
+  "license": "Apache-2.0"
+}
