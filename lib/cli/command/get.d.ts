@@ -1,6 +1,8 @@
 import { Future } from '@quenk/noni/lib/control/monad/future';
 import { Options } from '../options';
 export declare const EXT_ERIC = ".eric";
+export declare const FILE_GIT = ".git";
+export declare const FILE_ERIC_JSON = "eric.json";
 /**
  * Get command.
  *
