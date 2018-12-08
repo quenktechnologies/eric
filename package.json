@@ -1,6 +1,6 @@
 {
   "name": "@quenk/eric",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "CLI tool for generating project boilerplate.",
   "author": "Quenk Technologies Limited <info@quenk.com> (http://quenk.com)",
   "bin": {
