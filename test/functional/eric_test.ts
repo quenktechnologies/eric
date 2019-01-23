@@ -14,7 +14,7 @@ const BIN = `${__dirname}/../../lib/main.js`;
 const REPO = 'https://github.com/quenktechnologies/eric-skeleton-sample.git';
 const SAMPLE_PATH = `${__dirname}/sample`;
 const files = ['.editorconfig', '.gitignore', 'LICENSE.md', 'Makefile', 'README.md',
-    'mocha.opts', 'package.json'];
+ 'index.ts',   'mocha.opts', 'package.json'];
 
 const cleanup = () => toPromise(run('rm', `-fR ${SAMPLE_PATH}`))
 
