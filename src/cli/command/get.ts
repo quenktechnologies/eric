@@ -8,13 +8,15 @@ import {
     unlink,
     exists
 } from '@quenk/noni/lib/io/file';
+import { DoFn, doN } from '@quenk/noni/lib/control/monad';
 import { endsWith } from '@quenk/noni/lib/data/string';
 import { noop } from '@quenk/noni/lib/data/function';
 import {
-  Future,
-  pure,
-  parallel, 
-  liftP } from '@quenk/noni/lib/control/monad/future';
+    Future,
+    pure,
+    parallel,
+    liftP
+} from '@quenk/noni/lib/control/monad/future';
 import { polate } from '@quenk/polate';
 import { Context, Options } from '../options';
 
@@ -41,41 +43,45 @@ export class Get {
 
     run(): Future<void> {
 
-        return run(this.options);
+      const opts = this.options;
+
+        return doN(<DoFn<void, Future<void>>>function* () {
+
+            yield clone(opts.url, opts.out, {});
+
+            const files: Path[] = yield listFilesRec(opts.out);
+            const erics = files.filter(f => endsWith(f, EXT_ERIC));
+
+            yield parallel(erics.map(f => inter(opts.context, f)
+                .chain(() => unlink(f))));
+
+            return cleanup(opts.out);
+
+        });
 
     }
 
 }
 
-const run = (opts: Options): Future<void> =>
-    clone(opts.url, opts.out, {})
-        .chain(interpolate(opts))
-        .map(() => opts.out)
-        .chain(cleanup);
-
 const clone = (url: string, dest: Path, opts: git.CloneOptions): Future<void> =>
     liftP(() => git.Clone.clone(url, dest, opts).then(() => { }));
 
-const interpolate = (opts: Options) => () =>
-    listFilesRec(opts.out)
-        .chain(files =>
-            parallel(
-                files
-                    .filter(f => endsWith(f, EXT_ERIC))
-                    .map(f =>
-                        inter(opts.context, f)
-                            .chain(() => unlink(f)))));
-
 const inter = (ctx: Context, path: Path) =>
-    readTextFile(path)
-        .map(txt => polate(txt, ctx, polateOptions))
-        .chain(writeEricFile(path))
+    doN(<DoFn<void, Future<void>>>function* () {
 
-const writeEricFile = (path: Path) => (contents: string) =>
-    writeTextFile(path.split(EXT_ERIC).join(''), contents);
+        const txt = yield readTextFile(path);
+        const contents = polate(txt, ctx, polateOptions);
 
-const cleanup = (path: Path) =>
-    unlink(join(path, FILE_GIT))
-        .chain(() => exists(join(path, FILE_ERIC_JSON)))
-        .chain(yes => yes ? unlink(join(path, FILE_ERIC_JSON)) : pure(noop()))
-        .map(noop);
+        return writeTextFile(path.split(EXT_ERIC).join(''), contents);
+
+    });
+
+const cleanup = (path: Path) => doN(<DoFn<void, Future<void>>>function* () {
+
+    yield unlink(join(path, FILE_GIT));
+
+    const yes = yield exists(join(path, FILE_ERIC_JSON));
+
+    return yes ? unlink(join(path, FILE_ERIC_JSON)) : pure(noop())
+
+});
