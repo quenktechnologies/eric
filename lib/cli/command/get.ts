@@ -32,6 +32,17 @@ const polateOptions = {
 
 }
 
+const fetchOpts = {
+
+    callbacks: {
+
+        credentials: (_: string, username: string) =>
+            git.Cred.sshKeyFromAgent(username)
+
+    }
+
+}
+
 /**
  * Get command.
  *
@@ -43,11 +54,11 @@ export class Get {
 
     run(): Future<void> {
 
-      const opts = this.options;
+        const opts = this.options;
 
-        return doN(<DoFn<void, Future<void>>>function* () {
+        return doN(<DoFn<void, Future<void>>>function*() {
 
-            yield clone(opts.url, opts.out, {});
+            yield clone(opts.url, opts.out, { fetchOpts });
 
             const files: Path[] = yield listFilesRec(opts.out);
             const erics = files.filter(f => endsWith(f, EXT_ERIC));
@@ -67,7 +78,7 @@ const clone = (url: string, dest: Path, opts: git.CloneOptions): Future<void> =>
     liftP(() => git.Clone.clone(url, dest, opts).then(() => { }));
 
 const inter = (ctx: Context, path: Path) =>
-    doN(<DoFn<void, Future<void>>>function* () {
+    doN(<DoFn<void, Future<void>>>function*() {
 
         const txt = yield readTextFile(path);
         const contents = polate(txt, ctx, polateOptions);
@@ -76,7 +87,7 @@ const inter = (ctx: Context, path: Path) =>
 
     });
 
-const cleanup = (path: Path) => doN(<DoFn<void, Future<void>>>function* () {
+const cleanup = (path: Path) => doN(<DoFn<void, Future<void>>>function*() {
 
     yield unlink(join(path, FILE_GIT));
 
