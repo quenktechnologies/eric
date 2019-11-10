@@ -1,6 +1,6 @@
 {
     "name": "@quenk/eric",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "description": "CLI tool for generating projects from templates.",
     "author": "Quenk Technologies Limited <info@quenk.com> (http://quenk.com)",
     "bin": {
@@ -31,8 +31,6 @@
     },
     "license": "Apache-2.0",
     "engines": {
-
         "node": "12.13.0"
-
     }
 }
