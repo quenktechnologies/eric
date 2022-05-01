@@ -1,5 +1,5 @@
 
-declare module 'docopt' {
+declare module '@quenk/docopt' {
 
     export interface Arguments {
 

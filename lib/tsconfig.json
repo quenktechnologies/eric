@@ -1,8 +1,7 @@
 {
     "compilerOptions": {
         "baseUrl": "src",
-        "lib": ["ES2017", "DOM"],
-        "noImplicitAny": true,
+        "lib": ["es2017", "DOM"],
         "module": "commonjs",
         "target": "es6",
         "rootDir": ".",
@@ -10,10 +9,12 @@
         "allowUnreachableCode": true,
         "noUnusedParameters": true,
         "noUnusedLocals": true,
+        "strict": true,
         "sourceMap": true,
         "declaration": true,
         "types": ["node"],
-        "typeRoots": ["node_modules/@types"]
+        "typeRoots": ["node_modules/@types"],
+        "noErrorTruncation": true
     },
     "exclude": ["node_modules"]
 }

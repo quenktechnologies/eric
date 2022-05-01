@@ -1,7 +1,5 @@
 # Eric
 
-![Eric Williams][eric]
-
 CLI tool for generating projects from templates.
 
 ## Installation

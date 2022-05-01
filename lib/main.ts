@@ -1,5 +1,5 @@
 #! /usr/bin/env node
-import * as docopt from 'docopt';
+import * as docopt from '@quenk/docopt';
 import { basename } from 'path';
 import { Arguments } from './cli/arguments';
 import { main } from './cli';
@@ -20,7 +20,7 @@ Options:
   --context PATH     Merge a JCON file at the specified path into context.
   --version          Show version.
 `, {
-        version: require('../package.json').version
-    });
+    version: require('../package.json').version
+});
 
 main(args);

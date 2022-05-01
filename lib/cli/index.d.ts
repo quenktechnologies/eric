@@ -8,4 +8,4 @@ export declare const runCommand: (opts: Options) => Future<void>;
 /**
  * main application function.
  */
-export declare const main: (args: Arguments) => import("@quenk/noni/lib/control/monad/future").Compute<void>;
+export declare const main: (args: Arguments) => import("@quenk/noni/lib/control/monad/future").Aborter;
