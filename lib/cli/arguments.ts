@@ -1,25 +1,26 @@
-import { basename, isAbsolute, join, dirname } from 'path';
+import { join, dirname } from 'path';
 import { homedir } from 'os';
-import { set } from 'property-seek';
+
 import {
     Path,
     readTextFile,
     exists,
 } from '@quenk/noni/lib/io/file';
-import { rmerge } from '@quenk/noni/lib/data/record';
-import { Object } from '@quenk/noni/lib/data/json';
-import { Future, parallel, pure } from '@quenk/noni/lib/control/monad/future';
+import { merge, rmerge } from '@quenk/noni/lib/data/record';
+import { Object, Value } from '@quenk/noni/lib/data/jsonx';
+import {
+    Future,
+    doFuture,
+    parallel,
+    pure
+} from '@quenk/noni/lib/control/monad/future';
+import { set } from '@quenk/noni/lib/data/record/path';
+
 import { interp } from '@quenk/jcon/lib/interp';
 import { newContext } from '@quenk/jcon/lib/interp/context/global/node';
-import { Context, Options } from './options';
 
-export const FILE_ERICRC = '.ericrc';
-export const EXT_ERIC = '.eric';
-
-/**
- * commands supported.
- */
-export const commands = ['get', 'inspect'];
+import { Options } from './command/options';
+import { Context } from '../project/context';
 
 /**
  * Arguments passed via the cli.
@@ -30,76 +31,71 @@ export interface Arguments extends Object {
 
     '--context': string[],
 
-    '--out': string
+    '<url>': string,
 
-    '<url>': string
+    '<path>': string
+
+}
+
+const defaults: Partial<Arguments> = {
+
+    '<url>': '',
+
+    '<path>': '',
+
+    '--set': [],
+
+    '--context': []
 
 }
 
 /**
- * toOptions converts Arguments to an Options object.
+ * toOptions converts an [[Arguments]] object to an Options object.
  *
- * Defaults are included for the --out and --context flags.
- * If the user's home directory contains an .ericrc file
- * then we read context information from there as well.
+ * Defaults are included for the --context flag. If the user's home directory
+ * contains an .ericrc file then we read context information from there as well.
  */
 export const toOptions = (args: Arguments): Future<Options> =>
-    readRCFile()
-        .chain(joinRCFile(args));
+    doFuture(function*() {
 
-const joinRCFile = (args: Arguments) => (ctx: Context): Future<Options> =>
-    parallel(args['--context'].map(readJCONFile))
-        .map(ctxs => ctxs.reduce(rmerge, ctx))
-        .map(context => rmerge({ context }, mkOptions(args)));
+        args = merge(defaults, args);
 
-const readRCFile = (): Future<Context> =>
-    exists(ericrc())
-        .chain(defaultRCFile);
+        let rcPath = join(homedir(), '.ericrc');
 
-const defaultRCFile = (yes: boolean): Future<Context> =>
-    yes ? readJCONFile(ericrc()) : pure({});
+        let context: Object =
+            (yield exists(rcPath)) ? yield readJCONFile(rcPath) : {};
 
-const ericrc = () =>
-    join(homedir(), FILE_ERICRC);
+        let otherCtxs: Object[] =
+            yield parallel(args['--context'].map(readJCONFile));
+
+        context = args['--set'].reduce((prev: Object, curr) => {
+
+            let [path, value] = curr.split('=');
+
+            return set<Value, Object>(path, value, prev);
+
+        }, otherCtxs.reduce(rmerge, context));
+
+        let command = getCommand(args);
+
+        let src = args['<url>'];
+
+        let dest = args['<path>'];
+
+        return pure({ src, dest, context, command });
+
+    });
 
 const readJCONFile = (path: Path): Future<Context> =>
-    readTextFile(path)
-        .chain(interpJCON(path));
+    doFuture(function*() {
 
-const interpJCON = (path: Path) => (txt: string): Future<Context> =>
-    interp(newContext(dirname(path)), txt);
+        let txt: string = yield readTextFile(path);
 
-const mkOptions = (args: Arguments) => ({
+        return interp(newContext(dirname(path)), txt);
 
-    url: args['<url>'],
+    })
 
-    out: getOut(args),
-
-    context: addSets({}, args['--set']),
-
-    command: getCommand(args)
-
-});
-
-
-const getOut = (args: Arguments) =>
-    (args['<url>']) ?
-        expand(process.cwd(), args['--out'] || repoName(args['<url>'])) :
-        '';
+const commands = ['get', 'inspect'];
 
 const getCommand = (args: Arguments): string =>
     commands.reduce((p, c) => (p !== '') ? p : (args[c] === true) ? c : p, '');
-
-const addSets = (ctx: Context, sets: string[]): Context =>
-    sets.reduce((p, c) => {
-
-        let v = c.split('=');
-        return set(v[0], v[1], p);
-
-    }, ctx);
-
-const repoName = (path: Path) =>
-    basename(path).split('.git').join('');
-
-const expand = (parent: Path, name: string): Path =>
-    isAbsolute(name) ? name : join(parent, name);

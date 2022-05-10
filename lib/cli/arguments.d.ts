@@ -1,26 +1,19 @@
-import { Object } from '@quenk/noni/lib/data/json';
+import { Object } from '@quenk/noni/lib/data/jsonx';
 import { Future } from '@quenk/noni/lib/control/monad/future';
-import { Options } from './options';
-export declare const FILE_ERICRC = ".ericrc";
-export declare const EXT_ERIC = ".eric";
-/**
- * commands supported.
- */
-export declare const commands: string[];
+import { Options } from './command/options';
 /**
  * Arguments passed via the cli.
  */
 export interface Arguments extends Object {
     '--set': string[];
     '--context': string[];
-    '--out': string;
     '<url>': string;
+    '<path>': string;
 }
 /**
- * toOptions converts Arguments to an Options object.
+ * toOptions converts an [[Arguments]] object to an Options object.
  *
- * Defaults are included for the --out and --context flags.
- * If the user's home directory contains an .ericrc file
- * then we read context information from there as well.
+ * Defaults are included for the --context flag. If the user's home directory
+ * contains an .ericrc file then we read context information from there as well.
  */
 export declare const toOptions: (args: Arguments) => Future<Options>;

@@ -1,21 +1,18 @@
 import { Path } from '@quenk/noni/lib/io/file';
-import { Object } from '@quenk/noni/lib/data/json';
-/**
- * Context eric files are expanded in .
- */
-export declare type Context = Object;
+import { Context } from '../../project/context';
+import { Url } from '../../client';
 /**
  * Options used during execution.
  */
 export interface Options {
     /**
-     * url to clone from.
+     * src url to clone from.
      */
-    url: string;
+    src: Url;
     /**
-     * out path to create project
+     * dest path to create project
      */
-    out: Path;
+    dest: Path;
     /**
      * context to evalutate .eric files in.
      */
