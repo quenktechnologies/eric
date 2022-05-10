@@ -31,15 +31,15 @@ const main = (args: Arguments) => doFuture(function*() {
 
     let opts = yield toOptions(args);
 
-  let ctl = new CommandController();
+    let ctl = new CommandController();
 
-  let commands = [ 
-  new InspectCommand(ctl,opts), 
-    new GetCommand(ctl, opts)
-];
+    let commands = [
+        new InspectCommand(ctl, opts),
+        new GetCommand(ctl, opts)
+    ];
 
-  return (<Command>commands.find(cmd => cmd.name === opts.command)).execute();
+    return (<Command>commands.find(cmd => cmd.name === opts.command)).execute();
 
 });
 
-main(args).fork();
+main(args).fork(console.error);

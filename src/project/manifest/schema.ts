@@ -7,7 +7,7 @@ import * as records from '@quenk/preconditions/lib/record';
 import * as arrays from '@quenk/preconditions/lib/array';
 
 import { Value, Object } from '@quenk/noni/lib/data/jsonx';
-import { merge, reduce } from '@quenk/noni/lib/data/record';
+import { merge } from '@quenk/noni/lib/data/record';
 import {
     doFuture,
     Future,
@@ -18,7 +18,7 @@ import { Path, readJSONXFile } from '@quenk/noni/lib/io/file';
 
 import { Failure } from '@quenk/preconditions/lib/result/failure';
 
-import { BaseType, EnumType, Manifest } from '.';
+import {  Manifest } from '.';
 
 const baseType: pre.Preconditions<Value, Value> = {
 
@@ -44,20 +44,26 @@ const enumType: pre.Preconditions<Value, Value> = merge(baseType, {
 
     type: pre.eq('enum'),
 
-    values: arrays.map<Value, Value>(pre.or(numbers.isNumber,
-        pre.or<Value, Value>(booleans.isBoolean, strings.isString)))
+    values: pre.every(
+        arrays.isArray,
+        arrays.map<Value, Value>(pre.or(numbers.isNumber,
+            pre.or<Value, Value>(booleans.isBoolean, strings.isString))))
 
 });
 
-const manifestType: pre.Preconditions<Value,Value> = {
+const manifestType: pre.Preconditions<Value, Value> = {
 
     name: strings.isString,
 
-    context: <pre.Precondition<Value, Value>>records.map<Object, Value, Object>(
-        pre.or<Object, Object>(records.restrict(numberType),
-            pre.or(records.restrict(booleanType),
-                pre.or(records.restrict(stringType),
-                    records.restrict(enumType)))))
+    context: <pre.Precondition<Value, Value>>pre.every(
+        records.isRecord,
+        records.map<Value, Value, Object>(
+            pre.anyOf<Value, Value>(
+                <pre.Precondition<Value, Value>>records.restrict(numberType),
+                <pre.Precondition<Value, Value>>records.restrict(booleanType),
+                <pre.Precondition<Value, Value>>records.restrict(stringType),
+                <pre.Precondition<Value, Value>>records.restrict(enumType)
+            )))
 
 }
 
@@ -69,13 +75,15 @@ export const validate: pre.Precondition<Value, Manifest> =
 
 const errorTemplates = {
 
-    'string': '{key} must be a string',
+    'isString': '{key} must be a string',
 
-    'number': '{key} must be a number',
+    'isNumber': '{key} must be a number',
 
-    'boolean': '{key} is a boolean value',
+    'isBoolean': '{key} is a boolean value',
 
-    'required': '{key} is required'
+    'required': '{key} is required',
+
+    'eq': '{key} is not one of number,boolean,string or enum'
 
 }
 
@@ -86,12 +94,9 @@ export const failure2Error = (result: Failure<Value>) => {
 
     let msgs = <Record<string, string>>result.explain(errorTemplates);
 
-    let lines = reduce(msgs, <string[]>[],
-        (all, msg: string) => all.concat(msg));
-
     return new Error([
         'Encountered errors parsing the project manifest file:',
-        ...lines
+        JSON.stringify(msgs)
     ].join(os.EOL))
 
 }
@@ -112,22 +117,3 @@ export const validateManifest = (dest: Path): Future<Manifest> =>
         return pure(emanifest.takeRight());
 
     })
-
-const validators: pre.Preconditions<Value, Value> = {
-
-    number: numbers.isNumber,
-
-    boolean: booleans.isBoolean,
-
-    string: strings.isString,
-
-}
-
-/**
- * getTypeValidator provides a validator for values of the provided type 
- * specifier.
- */
-export const getTypeValidator =
-    (typ: BaseType): pre.Precondition<Value, Value> => (typ.type === 'enum') ?
-        pre.isin<Value>((<EnumType>typ).values) :
-        validators[typ.type];

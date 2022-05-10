@@ -1,4 +1,5 @@
 import * as readline from 'readline';
+import * as os from 'os';
 
 import { Value } from '@quenk/noni/lib/data/jsonx';
 
@@ -26,7 +27,9 @@ export class Prompter {
 
             input: process.stdin,
 
-            output: process.stdout
+            output: process.stdout,
+
+            prompt: 'eric>'
 
         }));
 
@@ -46,18 +49,30 @@ export class Prompter {
 
             while (true) {
 
-                let val = yield fromCallback(cb => 
-                  iface.question(msg, str => cb(null, str)));
+                let val = yield fromCallback(cb =>
+                    iface.question(`${msg}${os.EOL}`, str => cb(null, str)));
 
-                if ((val == '') && (defaults != null))
-                    val = defaults;
+                let result = validator(val);
 
-                if (validator(val).isRight())
-                    return pure(val);
+                if (result.isRight()) {
+
+                    return pure(result.takeRight());
+
+                } else if (((val == null) || (val == '')) &&
+                  (defaults != null)) {
+                    return pure(defaults);
+
+                }
 
             }
 
         });
+
+    }
+
+    close() {
+
+        this.iface.close();
 
     }
 

@@ -3,7 +3,14 @@ import * as prop from '@quenk/noni/lib/data/record/path';
 import { join } from 'path';
 
 import { clone, filter } from '@quenk/noni/lib/data/record';
-import { listFilesRec, Path, readTextFile, unlink, writeTextFile } from '@quenk/noni/lib/io/file';
+import { 
+  Path,
+  listFilesRec, 
+  readTextFile,
+  unlink, 
+  writeTextFile 
+} from '@quenk/noni/lib/io/file';
+import { endsWith, interpolate } from '@quenk/noni/lib/data/string';
 import {
     Future,
     doFuture,
@@ -11,12 +18,10 @@ import {
     parallel
 } from '@quenk/noni/lib/control/monad/future';
 
-import { getTypeValidator } from './manifest/schema';
+import { getTypeValidator } from './manifest/checks/type';
 import { Context } from '../project/context';
 import { Prompter } from '../cli/prompter';
 import { BaseType, Manifest } from './manifest';
-import { endsWith } from '@quenk/noni/lib/data/string';
-import { polate } from '@quenk/polate';
 
 /**
  * Project represents a successfully copied project template to the filesystem
@@ -98,9 +103,9 @@ export class Project {
 
     }
 
-  /**
-   * expand the template files in the project.
-   */
+    /**
+     * expand the template files in the project.
+     */
     expand() {
 
         let { path, context } = this;
@@ -153,7 +158,7 @@ const inter = (ctx: Context, path: Path) => doFuture(function*() {
 
     let txt = yield readTextFile(path);
 
-    let contents = polate(txt, ctx, polateOptions);
+    let contents = interpolate(txt, ctx, polateOptions);
 
     return writeTextFile(path.split('.eric').join(''), contents);
 

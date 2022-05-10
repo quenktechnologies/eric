@@ -45,8 +45,9 @@ const enumType: pre.Preconditions<Value, Value> = {
 
     prompt: pre.optional(strings.isString),
 
-    values: <pre.Precondition<Value, Value>>arrays.map(pre.or(numbers.isNumber,
-        pre.or<Value, Value>(booleans.isBoolean, strings.isString)))
+    values: <pre.Precondition<Value, Value>>pre.and(arrays.isArray,
+        arrays.map(pre.or(numbers.isNumber,
+            pre.or<Value, Value>(booleans.isBoolean, strings.isString))))
 
 }
 
@@ -54,12 +55,13 @@ const rules: pre.Preconditions<Value, Value> = {
 
     name: strings.isString,
 
-    context: <pre.Precondition<Value, Value>>records.map(
-      pre.anyOf<Object, Object>(
-        records.restrict(numberType),
-        records.restrict(booleanType),
-        records.restrict(stringType),
-        records.restrict(enumType)))
+    context: <pre.Precondition<Value, Value>>pre.and(records.isRecord, 
+       records.map(
+        pre.anyOf<Object, Object>(
+            records.restrict(numberType),
+            records.restrict(booleanType),
+            records.restrict(stringType),
+            records.restrict(enumType))))
 
 }
 

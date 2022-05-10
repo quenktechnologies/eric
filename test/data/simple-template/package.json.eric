@@ -1,0 +1,14 @@
+{
+    "name": "{{{project.name}}}",
+
+     "version": "{{{project.version}}}",
+     
+     "git":    "{{{project.git.url}}}",
+
+     "private": {{{project.private}}},
+
+     "priority": {{{project.priority}}},
+
+     "license": "{{{project.license}}}"
+
+}

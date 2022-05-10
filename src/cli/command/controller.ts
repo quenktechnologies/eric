@@ -40,7 +40,11 @@ export class CommandController {
 
             let project: Project = yield client.fetch(src);
 
-            project.prompt(Prompter.create());
+            let prompter = Prompter.create();
+
+            yield project.prompt(prompter);
+
+            prompter.close();
 
             return project.expand();
 

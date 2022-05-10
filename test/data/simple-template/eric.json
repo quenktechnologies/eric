@@ -1,0 +1,62 @@
+{
+    "name": "simple-template",
+
+    "context": {
+
+        "project.name": {
+
+            "type": "string",
+
+            "prompt": "What shall we call this project?"
+
+        },
+
+        "project.version": {
+
+            "type": "string",
+
+            "prompt": "What version is the project?"
+
+        },
+
+        "project.private": {
+
+            "type": "boolean",
+
+            "prompt": "Is this project private?"
+
+        },
+
+        "project.git.url": {
+
+            "type": "string",
+
+            "optional": true,
+
+            "prompt": "Specify a url for git.",
+
+            "default": "https://quenk.com/repo"
+
+        },
+
+        "project.priority": {
+
+            "type": "number",
+
+            "prompt": "Assign a priority to this project",
+
+            "default": 1
+
+        },
+
+        "project.license": {
+
+            "type": "enum",
+
+            "values": ["MIT", "Apache-2.0", "GPL"]
+
+        }
+
+    }
+
+}
