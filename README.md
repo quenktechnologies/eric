@@ -6,10 +6,9 @@ CLI tool for generating projects from templates.
 
 ```sh
 npm install @quenk/eric -g
-
 ```
 
-```Usage
+## Usage
 
 In order to generate your project boilerplate, you must first create a template.
 
